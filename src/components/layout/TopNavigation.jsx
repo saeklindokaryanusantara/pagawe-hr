@@ -25,10 +25,7 @@ const TopNavigation = () => {
       <div className="nav-content">
         <div className="nav-left">
           <div className="logo-container">
-            <div className="logo-icon">
-              <Users size={20} color="white" />
-            </div>
-            <span>Pagawe</span>
+            <img src="/logo.png" alt="Pagawe Logo" style={{ height: '36px', objectFit: 'contain' }} />
           </div>
 
           <div className="nav-links">

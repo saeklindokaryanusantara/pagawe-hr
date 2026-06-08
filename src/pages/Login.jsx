@@ -50,7 +50,7 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h1>Pagawe</h1>
+          <img src="/logo.png" alt="Pagawe Logo" style={{ height: '80px', objectFit: 'contain', marginBottom: '0.5rem' }} />
           <p>Sistem Manajemen SDM Internal</p>
         </div>
 
