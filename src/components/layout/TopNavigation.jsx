@@ -7,11 +7,19 @@ import {
   Briefcase, 
   FileText, 
   BarChart3, 
+  Settings,
   LogOut 
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import './TopNavigation.css';
 
 const TopNavigation = () => {
+  const { user, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+  };
+
   return (
     <nav className="nav-container">
       <div className="nav-content">
@@ -48,18 +56,24 @@ const TopNavigation = () => {
               <BarChart3 size={18} />
               Reports
             </NavLink>
+            <NavLink to="/settings" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+              <Settings size={18} />
+              Settings
+            </NavLink>
           </div>
         </div>
 
         <div className="nav-right">
           <div className="user-profile">
-            <span className="user-name">Admin</span>
+            <span className="user-name" style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user?.email || 'Admin'}
+            </span>
             <span className="user-role">Administrator</span>
           </div>
           
           <div className="nav-right-divider"></div>
           
-          <button className="logout-btn">
+          <button className="logout-btn" onClick={handleLogout}>
             <LogOut size={18} />
             Logout
           </button>

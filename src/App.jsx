@@ -6,13 +6,11 @@ import Employees from './pages/Employees';
 import EmployeeDetail from './pages/EmployeeDetail';
 import Clients from './pages/Clients';
 import Projects from './pages/Projects';
+import Contracts from './pages/Contracts';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
-
-// Placeholder components for other routes
-const Contracts = () => <div className="container" style={{paddingTop: '2rem'}}><h2>Contracts Module (WIP Phase 4)</h2></div>;
-const Reports = () => <div className="container" style={{paddingTop: '2rem'}}><h2>Reports Module (WIP Phase 4)</h2></div>;
-
 // Layout for authenticated users
 const MainLayout = () => (
   <div className="app-container">
@@ -38,6 +36,7 @@ function App() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/contracts" element={<Contracts />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>
     </Routes>

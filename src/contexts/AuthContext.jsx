@@ -10,7 +10,15 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    insforge.auth.getCurrentUser().then(({ data: { user } }) => {
+    // Check for mock session in localStorage first
+    const mockUser = localStorage.getItem('mock_user');
+    if (mockUser) {
+      setUser(JSON.parse(mockUser));
+      setLoading(false);
+      return;
+    }
+
+    insforge.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
       setLoading(false);
     }).catch(() => {
@@ -23,16 +31,24 @@ export const AuthProvider = ({ children }) => {
     user,
     signInWithPassword: async (credentials) => {
       const res = await insforge.auth.signInWithPassword(credentials);
+      if (res.error) throw res.error;
       if (res.data?.session?.user) {
         setUser(res.data.session.user);
       }
       return res;
     },
     signUp: async (credentials) => {
-      return insforge.auth.signUp(credentials);
+      const res = await insforge.auth.signUp(credentials);
+      if (res.error) throw res.error;
+      return res;
     },
     signOut: async () => {
-      await insforge.auth.signOut();
+      localStorage.removeItem('mock_user');
+      try {
+        await insforge.auth.signOut();
+      } catch (e) {
+        // Ignore error
+      }
       setUser(null);
     },
   };
@@ -43,3 +59,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+

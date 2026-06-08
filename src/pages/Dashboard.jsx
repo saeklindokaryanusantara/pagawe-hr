@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Activity, Briefcase, Building } from 'lucide-react';
 import { 
   BarChart, 
@@ -12,31 +12,73 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import { insforge } from '../lib/insforge';
 import './Dashboard.css';
 
-// Mock Data
-const kpiData = {
-  assignedStaff: 124,
-  idleStaff: 8,
-  activeProjects: 15,
-  utilizationRate: 94
-};
-
-const topProjectsData = [
-  { name: 'Project Alpha - UI', workers: 45 },
-  { name: 'Beta Migration', workers: 32 },
-  { name: 'Gamma Setup', workers: 28 },
-  { name: 'Delta Support', workers: 19 }
-];
-
-const utilizationData = [
-  { name: 'Assigned', value: 124 },
-  { name: 'Idle', value: 8 }
-];
-
-const COLORS = ['#2563eb', '#e5e7eb']; // Primary Blue and Gray
+const COLORS = ['#2563eb', '#e5e7eb'];
 
 const Dashboard = () => {
+  const [kpiData, setKpiData] = useState({ assignedStaff: 0, idleStaff: 0, activeProjects: 0, utilizationRate: 0 });
+  const [topProjectsData, setTopProjectsData] = useState([]);
+  const [utilizationData, setUtilizationData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      const [empRes, projRes, assignRes] = await Promise.all([
+        insforge.database.from('employees').select('*'),
+        insforge.database.from('projects').select('*'),
+        insforge.database.from('project_assignments').select('*'),
+      ]);
+
+      const employees = empRes.data || [];
+      const projects = projRes.data || [];
+      const assignments = assignRes.data || [];
+
+      // KPI calculations
+      const activeEmployees = employees.filter(e => e.status === 'Active');
+      const assignedEmployeeIds = [...new Set(assignments.map(a => a.employee_id))];
+      const assignedCount = activeEmployees.filter(e => assignedEmployeeIds.includes(e.id)).length;
+      const idleCount = activeEmployees.length - assignedCount;
+      const activeProjectCount = projects.filter(p => p.status === 'Active').length;
+      const rate = activeEmployees.length > 0 ? Math.round((assignedCount / activeEmployees.length) * 100) : 0;
+
+      setKpiData({
+        assignedStaff: assignedCount,
+        idleStaff: idleCount,
+        activeProjects: activeProjectCount,
+        utilizationRate: rate
+      });
+
+      // Top projects chart data
+      const projectChartData = projects
+        .map(p => ({
+          name: p.project_name?.length > 18 ? p.project_name.substring(0, 18) + '...' : p.project_name,
+          workers: assignments.filter(a => a.project_id === p.id).length
+        }))
+        .sort((a, b) => b.workers - a.workers)
+        .slice(0, 6);
+      setTopProjectsData(projectChartData);
+
+      // Utilization pie data
+      setUtilizationData([
+        { name: 'Assigned', value: assignedCount },
+        { name: 'Idle', value: idleCount }
+      ]);
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       {/* Hero Section */}
@@ -63,7 +105,7 @@ const Dashboard = () => {
                   <Users size={20} />
                 </div>
               </div>
-              <div className="kpi-value">{kpiData.assignedStaff}</div>
+              <div className="kpi-value">{loading ? '...' : kpiData.assignedStaff}</div>
             </div>
 
             <div className="kpi-card delay-200">
@@ -73,7 +115,7 @@ const Dashboard = () => {
                   <Activity size={20} />
                 </div>
               </div>
-              <div className="kpi-value">{kpiData.idleStaff}</div>
+              <div className="kpi-value">{loading ? '...' : kpiData.idleStaff}</div>
             </div>
 
             <div className="kpi-card delay-300">
@@ -83,7 +125,7 @@ const Dashboard = () => {
                   <Briefcase size={20} />
                 </div>
               </div>
-              <div className="kpi-value">{kpiData.activeProjects}</div>
+              <div className="kpi-value">{loading ? '...' : kpiData.activeProjects}</div>
             </div>
 
             <div className="kpi-card delay-300">
@@ -93,7 +135,7 @@ const Dashboard = () => {
                   <Building size={20} />
                 </div>
               </div>
-              <div className="kpi-value">{kpiData.utilizationRate}%</div>
+              <div className="kpi-value">{loading ? '...' : `${kpiData.utilizationRate}%`}</div>
             </div>
 
           </div>

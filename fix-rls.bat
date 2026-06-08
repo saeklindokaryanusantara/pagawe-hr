@@ -1,0 +1,47 @@
+@echo off
+ssh root@187.77.120.188 "cat << 'EOSQL' | docker exec -i supabase-db psql -U postgres -d postgres
+CREATE POLICY IF NOT EXISTS dept_select ON departments FOR SELECT TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS dept_insert ON departments FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS dept_update ON departments FOR UPDATE TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS dept_delete ON departments FOR DELETE TO authenticated USING (true);
+DROP POLICY IF EXISTS \"Allow authenticated users to read employees\" ON employees;
+DROP POLICY IF EXISTS \"Allow authenticated users to insert employees\" ON employees;
+DROP POLICY IF EXISTS \"Allow authenticated users to update employees\" ON employees;
+DROP POLICY IF EXISTS \"Allow authenticated users to delete employees\" ON employees;
+CREATE POLICY IF NOT EXISTS employees_select ON employees FOR SELECT TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS employees_insert ON employees FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS employees_update ON employees FOR UPDATE TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS employees_delete ON employees FOR DELETE TO authenticated USING (true);
+DROP POLICY IF EXISTS \"Allow authenticated users to read clients\" ON clients;
+DROP POLICY IF EXISTS \"Allow authenticated users to insert clients\" ON clients;
+DROP POLICY IF EXISTS \"Allow authenticated users to update clients\" ON clients;
+DROP POLICY IF EXISTS \"Allow authenticated users to delete clients\" ON clients;
+CREATE POLICY IF NOT EXISTS clients_select ON clients FOR SELECT TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS clients_insert ON clients FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS clients_update ON clients FOR UPDATE TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS clients_delete ON clients FOR DELETE TO authenticated USING (true);
+DROP POLICY IF EXISTS \"Allow authenticated users to read projects\" ON projects;
+DROP POLICY IF EXISTS \"Allow authenticated users to insert projects\" ON projects;
+DROP POLICY IF EXISTS \"Allow authenticated users to update projects\" ON projects;
+DROP POLICY IF EXISTS \"Allow authenticated users to delete projects\" ON projects;
+CREATE POLICY IF NOT EXISTS projects_select ON projects FOR SELECT TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS projects_insert ON projects FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS projects_update ON projects FOR UPDATE TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS projects_delete ON projects FOR DELETE TO authenticated USING (true);
+DROP POLICY IF EXISTS \"Allow authenticated users to read project_assignments\" ON project_assignments;
+DROP POLICY IF EXISTS \"Allow authenticated users to insert project_assignments\" ON project_assignments;
+DROP POLICY IF EXISTS \"Allow authenticated users to update project_assignments\" ON project_assignments;
+DROP POLICY IF EXISTS \"Allow authenticated users to delete project_assignments\" ON project_assignments;
+CREATE POLICY IF NOT EXISTS project_assignments_select ON project_assignments FOR SELECT TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS project_assignments_insert ON project_assignments FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS project_assignments_update ON project_assignments FOR UPDATE TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS project_assignments_delete ON project_assignments FOR DELETE TO authenticated USING (true);
+DROP POLICY IF EXISTS \"Allow authenticated users to read contracts\" ON contracts;
+DROP POLICY IF EXISTS \"Allow authenticated users to insert contracts\" ON contracts;
+DROP POLICY IF EXISTS \"Allow authenticated users to update contracts\" ON contracts;
+DROP POLICY IF EXISTS \"Allow authenticated users to delete contracts\" ON contracts;
+CREATE POLICY IF NOT EXISTS contracts_select ON contracts FOR SELECT TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS contracts_insert ON contracts FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS contracts_update ON contracts FOR UPDATE TO authenticated USING (true);
+CREATE POLICY IF NOT EXISTS contracts_delete ON contracts FOR DELETE TO authenticated USING (true);
+EOSQL
