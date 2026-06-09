@@ -132,7 +132,8 @@ const Clients = () => {
   );
 
   return (
-    <div className="container animate-fade-in">
+    <>
+      <div className="container animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Clients</h1>
         <button className="btn btn-primary" onClick={() => handleOpenModal()}>
@@ -317,7 +318,7 @@ const Clients = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

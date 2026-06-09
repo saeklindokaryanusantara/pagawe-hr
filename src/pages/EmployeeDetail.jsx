@@ -164,7 +164,8 @@ const EmployeeDetail = () => {
   }
 
   return (
-    <div className="container animate-fade-in" style={{paddingBottom: '3rem'}}>
+    <>
+      <div className="container animate-fade-in" style={{paddingBottom: '3rem'}}>
       <div className="page-header" style={{marginBottom: '1rem'}}>
         <div className="flex items-center gap-4">
           <Link to="/employees" className="btn-icon" style={{color: 'var(--text-main)'}}>
@@ -330,7 +331,8 @@ const EmployeeDetail = () => {
         )}
       </div>
 
-      {/* Upload Document Modal */}
+      </div>
+
       {isUploadModalOpen && (
         <div className="modal-overlay" onClick={() => setIsUploadModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -364,7 +366,7 @@ const EmployeeDetail = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

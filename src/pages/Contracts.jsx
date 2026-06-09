@@ -246,7 +246,8 @@ const Contracts = () => {
   });
 
   return (
-    <div className="container animate-fade-in">
+    <>
+      <div className="container animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Contracts</h1>
         <button className="btn btn-primary" onClick={() => handleOpenModal()}>
@@ -389,6 +390,8 @@ const Contracts = () => {
       </div>
 
       {/* Add/Edit Contract Modal */}
+      </div>
+
       {isModalOpen && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -501,7 +504,7 @@ const Contracts = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

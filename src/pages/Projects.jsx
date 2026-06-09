@@ -291,7 +291,8 @@ const Projects = () => {
   });
 
   return (
-    <div className="container animate-fade-in">
+    <>
+      <div className="container animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Projects</h1>
         <button className="btn btn-primary" onClick={() => handleOpenModal()}>
@@ -384,6 +385,8 @@ const Projects = () => {
             ))}
           </tbody>
         </table>
+      </div>
+
       </div>
 
       {/* Add/Edit Project Modal */}
@@ -632,7 +635,7 @@ const Projects = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
