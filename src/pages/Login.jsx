@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { insforge } from '../lib/insforge';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn, UserPlus } from 'lucide-react';
+import { LogIn, UserPlus, KeyRound, ArrowLeft } from 'lucide-react';
 import './Login.css';
 
 const Login = () => {
-  const { user, signInWithPassword, signUp } = useAuth();
+  const { user, signInWithPassword, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
   
-  const [isSignUpMode, setIsSignUpMode] = useState(false);
+  const [mode, setMode] = useState('login'); // 'login', 'signup', 'reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,12 +27,17 @@ const Login = () => {
     setMessage(null);
 
     try {
-      if (isSignUpMode) {
+      if (mode === 'signup') {
         const { error } = await signUp({ email, password });
         if (error) throw error;
         setMessage('Registrasi berhasil! Silakan coba login sekarang.');
-        setIsSignUpMode(false); // Switch back to login mode
+        setMode('login'); // Switch back to login mode
         setPassword(''); // Clear password for safety
+      } else if (mode === 'reset') {
+        const { error } = await resetPassword(email);
+        if (error) throw error;
+        setMessage('Tautan reset password telah dikirim ke email Anda! (Periksa folder Spam jika tidak ada)');
+        setMode('login');
       } else {
         const { error } = await signInWithPassword({ email, password });
         if (error) throw error;
@@ -50,8 +54,17 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <img src="/logo.png" alt="Pagawe Logo" style={{ height: '80px', objectFit: 'contain', marginBottom: '0.5rem' }} />
-          <p>Sistem Manajemen SDM Internal</p>
+          {/* Logo or placeholder */}
+          <div style={{
+            width: '60px', height: '60px', borderRadius: '16px', 
+            background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 1.5rem auto', boxShadow: '0 10px 25px rgba(59, 130, 246, 0.4)'
+          }}>
+            <span style={{color: 'white', fontWeight: 'bold', fontSize: '1.5rem'}}>PG</span>
+          </div>
+          <h1>Pagawe HR</h1>
+          <p>{mode === 'reset' ? 'Reset Kata Sandi Anda' : 'Sistem Manajemen SDM Internal'}</p>
         </div>
 
         {error && <div className="login-error">{error}</div>}
@@ -71,48 +84,76 @@ const Login = () => {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Kata Sandi</label>
-            <input
-              id="password"
-              type="password"
-              className="form-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
-          </div>
+          {mode !== 'reset' && (
+            <div className="form-group">
+              <label htmlFor="password">Kata Sandi</label>
+              <input
+                id="password"
+                type="password"
+                className="form-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+              {mode === 'login' && (
+                <button 
+                  type="button" 
+                  className="forgot-password-link"
+                  onClick={() => {
+                    setMode('reset');
+                    setError(null);
+                    setMessage(null);
+                  }}
+                >
+                  Lupa Password?
+                </button>
+              )}
+            </div>
+          )}
 
           <button type="submit" className="btn-login" disabled={loading}>
             {loading ? 'Memproses...' : (
               <>
-                {isSignUpMode ? (
-                  <><UserPlus size={18} style={{ marginRight: '8px' }} /> Daftar Akun</>
-                ) : (
-                  <><LogIn size={18} style={{ marginRight: '8px' }} /> Masuk</>
-                )}
+                {mode === 'signup' && <><UserPlus size={18} style={{ marginRight: '8px' }} /> Daftar Akun</>}
+                {mode === 'login' && <><LogIn size={18} style={{ marginRight: '8px' }} /> Masuk</>}
+                {mode === 'reset' && <><KeyRound size={18} style={{ marginRight: '8px' }} /> Kirim Tautan Reset</>}
               </>
             )}
           </button>
         </form>
 
         <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            {isSignUpMode ? 'Sudah punya akun?' : 'Belum punya akun admin?'}
-            {' '}
+          {mode === 'reset' ? (
             <button 
               type="button" 
               onClick={() => {
-                setIsSignUpMode(!isSignUpMode);
+                setMode('login');
                 setError(null);
                 setMessage(null);
               }}
               className="signup-link"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
             >
-              {isSignUpMode ? 'Masuk di sini' : 'Daftar di sini'}
+              <ArrowLeft size={16} /> Kembali ke Login
             </button>
-          </p>
+          ) : (
+            <p style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
+              {mode === 'signup' ? 'Sudah punya akun?' : 'Belum punya akun admin?'}
+              {' '}
+              <button 
+                type="button" 
+                onClick={() => {
+                  setMode(mode === 'login' ? 'signup' : 'login');
+                  setError(null);
+                  setMessage(null);
+                }}
+                className="signup-link"
+              >
+                {mode === 'signup' ? 'Masuk di sini' : 'Daftar di sini'}
+              </button>
+            </p>
+          )}
         </div>
       </div>
     </div>

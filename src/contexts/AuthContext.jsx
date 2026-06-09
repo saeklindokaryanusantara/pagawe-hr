@@ -43,6 +43,17 @@ export const AuthProvider = ({ children }) => {
         throw err;
       }
     },
+    resetPassword: async (email) => {
+      try {
+        const res = await insforge.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin,
+        });
+        if (res.error) throw res.error;
+        return res;
+      } catch (err) {
+        throw err;
+      }
+    },
     signOut: async () => {
       localStorage.removeItem('mock_user');
       try {
