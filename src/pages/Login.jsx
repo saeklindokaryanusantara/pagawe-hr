@@ -66,7 +66,12 @@ const Login = () => {
             }} 
           />
           <p style={{ fontSize: '1.1rem', fontWeight: '500', color: '#e2e8f0', lineHeight: '1.5', padding: '0 10px' }}>
-            {mode === 'reset' ? 'Reset Kata Sandi Anda' : 'Sistem Manajemen SDM Internal PT. Saeklindo Karya Nusantara'}
+            {mode === 'reset' ? 'Reset Kata Sandi Anda' : (
+              <>
+                Sistem Manajemen SDM Internal<br />
+                <span style={{ fontWeight: '600', color: '#ffffff' }}>PT. Saeklindo Karya Nusantara</span>
+              </>
+            )}
           </p>
         </div>
 
