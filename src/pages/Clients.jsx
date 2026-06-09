@@ -178,7 +178,14 @@ const Clients = () => {
                     <div className="avatar" style={{backgroundColor: '#f3f4f6', color: 'var(--primary-blue)'}}>
                       <Building2 size={18} />
                     </div>
-                    <span className="font-medium">{client.name}</span>
+                    <div>
+                      <span className="font-medium" style={{ display: 'block' }}>{client.name}</span>
+                      {client.address && (
+                        <span className="text-muted" style={{ fontSize: '0.8rem', display: 'block', marginTop: '2px', maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {client.address}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </td>
                 <td>
