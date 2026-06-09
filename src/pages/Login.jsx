@@ -65,8 +65,9 @@ const Login = () => {
               filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))'
             }} 
           />
-          <h1>Pagawe HR</h1>
-          <p>{mode === 'reset' ? 'Reset Kata Sandi Anda' : 'Sistem Manajemen SDM Internal'}</p>
+          <p style={{ fontSize: '1.1rem', fontWeight: '500', color: '#e2e8f0', lineHeight: '1.5', padding: '0 10px' }}>
+            {mode === 'reset' ? 'Reset Kata Sandi Anda' : 'Sistem Manajemen SDM Internal PT. Saeklindo Karya Nusantara'}
+          </p>
         </div>
 
         {error && <div className="login-error">{error}</div>}
