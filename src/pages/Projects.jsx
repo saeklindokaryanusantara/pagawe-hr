@@ -223,7 +223,7 @@ const Projects = () => {
       if (error) throw error;
       
       // Move worker from available to assigned locally
-      const worker = availableWorkers.find(w => w.id === employeeId);
+      const worker = availableWorkers.find(w => String(w.id) === String(employeeId));
       if (worker) {
         setAssignedWorkers(prev => [...prev, worker]);
         setAvailableWorkers(prev => prev.filter(w => w.id !== employeeId));
@@ -244,7 +244,7 @@ const Projects = () => {
         .eq('employee_id', employeeId);
       if (error) throw error;
       
-      const worker = assignedWorkers.find(w => w.id === employeeId);
+      const worker = assignedWorkers.find(w => String(w.id) === String(employeeId));
       if (worker) {
         setAvailableWorkers(prev => [...prev, worker].sort((a, b) => a.name.localeCompare(b.name)));
         setAssignedWorkers(prev => prev.filter(w => w.id !== employeeId));
@@ -264,7 +264,7 @@ const Projects = () => {
   // --- Helpers ---
 
   const getClientName = (clientId) => {
-    const client = clients.find(c => c.id === clientId);
+    const client = clients.find(c => String(c.id) === String(clientId));
     return client ? client.name : '-';
   };
 

@@ -86,7 +86,7 @@ const Reports = () => {
   ];
 
   const getClientName = (clientId) => {
-    const c = clients.find(cl => cl.id === clientId);
+    const c = clients.find(cl => String(cl.id) === String(clientId));
     return c ? c.name : '-';
   };
 

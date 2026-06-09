@@ -194,12 +194,12 @@ const Contracts = () => {
   // --- Helpers ---
 
   const getEmployeeName = (employeeId) => {
-    const emp = employees.find(e => e.id === employeeId);
+    const emp = employees.find(e => String(e.id) === String(employeeId));
     return emp ? emp.name : '-';
   };
 
   const getEmployeePosition = (employeeId) => {
-    const emp = employees.find(e => e.id === employeeId);
+    const emp = employees.find(e => String(e.id) === String(employeeId));
     return emp ? emp.position : '';
   };
 
