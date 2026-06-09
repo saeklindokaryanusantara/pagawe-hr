@@ -19,6 +19,14 @@ CREATE TABLE profiles (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Departments table
+CREATE TABLE departments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT UNIQUE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Employees table
 CREATE TABLE employees (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -89,6 +97,7 @@ CREATE INDEX idx_contracts_employee_id ON contracts(employee_id);
 
 -- 3. Enable RLS on all tables
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE departments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
@@ -105,6 +114,11 @@ CREATE POLICY "Allow authenticated users to update profiles" ON profiles FOR UPD
 CREATE POLICY "Allow authenticated users to delete profiles" ON profiles FOR DELETE TO authenticated USING (id = (select auth.uid()));
 
 -- Business tables: Restrict to valid internal users (must exist in profiles)
+CREATE POLICY "Allow authenticated users to read departments" ON departments FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM profiles WHERE id = (select auth.uid())));
+CREATE POLICY "Allow authenticated users to insert departments" ON departments FOR INSERT TO authenticated WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = (select auth.uid())));
+CREATE POLICY "Allow authenticated users to update departments" ON departments FOR UPDATE TO authenticated USING (EXISTS (SELECT 1 FROM profiles WHERE id = (select auth.uid())));
+CREATE POLICY "Allow authenticated users to delete departments" ON departments FOR DELETE TO authenticated USING (EXISTS (SELECT 1 FROM profiles WHERE id = (select auth.uid())));
+
 CREATE POLICY "Allow authenticated users to read employees" ON employees FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM profiles WHERE id = (select auth.uid())));
 CREATE POLICY "Allow authenticated users to insert employees" ON employees FOR INSERT TO authenticated WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = (select auth.uid())));
 CREATE POLICY "Allow authenticated users to update employees" ON employees FOR UPDATE TO authenticated USING (EXISTS (SELECT 1 FROM profiles WHERE id = (select auth.uid())));
