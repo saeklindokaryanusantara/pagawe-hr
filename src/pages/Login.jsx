@@ -27,13 +27,7 @@ const Login = () => {
     setMessage(null);
 
     try {
-      if (mode === 'signup') {
-        const { error } = await signUp({ email, password });
-        if (error) throw error;
-        setMessage('Registrasi berhasil! Silakan coba login sekarang.');
-        setMode('login'); // Switch back to login mode
-        setPassword(''); // Clear password for safety
-      } else if (mode === 'reset') {
+      if (mode === 'reset') {
         const { error } = await resetPassword(email);
         if (error) throw error;
         setMessage('Tautan reset password telah dikirim ke email Anda! (Periksa folder Spam jika tidak ada)');
@@ -123,7 +117,6 @@ const Login = () => {
           <button type="submit" className="btn-login" disabled={loading}>
             {loading ? 'Memproses...' : (
               <>
-                {mode === 'signup' && <><UserPlus size={18} style={{ marginRight: '8px' }} /> Daftar Akun</>}
                 {mode === 'login' && <><LogIn size={18} style={{ marginRight: '8px' }} /> Masuk</>}
                 {mode === 'reset' && <><KeyRound size={18} style={{ marginRight: '8px' }} /> Kirim Tautan Reset</>}
               </>
@@ -145,23 +138,7 @@ const Login = () => {
             >
               <ArrowLeft size={16} /> Kembali ke Login
             </button>
-          ) : (
-            <p style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
-              {mode === 'signup' ? 'Sudah punya akun?' : 'Belum punya akun admin?'}
-              {' '}
-              <button 
-                type="button" 
-                onClick={() => {
-                  setMode(mode === 'login' ? 'signup' : 'login');
-                  setError(null);
-                  setMessage(null);
-                }}
-                className="signup-link"
-              >
-                {mode === 'signup' ? 'Masuk di sini' : 'Daftar di sini'}
-              </button>
-            </p>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
