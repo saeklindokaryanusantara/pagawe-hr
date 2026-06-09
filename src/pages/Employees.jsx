@@ -6,6 +6,8 @@ import './Pages.css';
 
 const Employees = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('');
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -249,6 +251,15 @@ const Employees = () => {
     }
   };
 
+  const filteredEmployees = employees.filter(emp => {
+    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === '' || emp.status === statusFilter;
+    const matchesDepartment = departmentFilter === '' || emp.department === departmentFilter;
+    return matchesSearch && matchesStatus && matchesDepartment;
+  });
+
+  const uniqueDepartments = [...new Set(employees.map(e => e.department).filter(Boolean))].sort();
+
   return (
     <>
       <div className="container animate-fade-in">
@@ -282,17 +293,17 @@ const Employees = () => {
           />
         </div>
         <div className="filters-container">
-          <select className="filter-select">
+          <select className="filter-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
             <option value="">All Status</option>
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
             <option value="On Leave">On Leave</option>
           </select>
-          <select className="filter-select">
+          <select className="filter-select" value={departmentFilter} onChange={e => setDepartmentFilter(e.target.value)}>
             <option value="">All Departments</option>
-            <option value="Engineering">Engineering</option>
-            <option value="HSE">HSE</option>
-            <option value="Operations">Operations</option>
+            {uniqueDepartments.map(dept => (
+              <option key={dept} value={dept}>{dept}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -311,7 +322,9 @@ const Employees = () => {
           <tbody>
             {loading ? (
               <tr><td colSpan="5" style={{textAlign: 'center', padding: '2rem'}}>Loading employees...</td></tr>
-            ) : employees.filter(emp => emp.name.toLowerCase().includes(searchTerm.toLowerCase())).map(emp => (
+            ) : filteredEmployees.length === 0 ? (
+              <tr><td colSpan="5" style={{textAlign: 'center', padding: '2rem'}}>Tidak ada data karyawan ditemukan.</td></tr>
+            ) : filteredEmployees.map(emp => (
               <tr key={emp.id}>
                 <td>
                   <div className="user-info">
