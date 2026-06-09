@@ -54,15 +54,17 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          {/* Logo or placeholder */}
-          <div style={{
-            width: '60px', height: '60px', borderRadius: '16px', 
-            background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 1.5rem auto', boxShadow: '0 10px 25px rgba(59, 130, 246, 0.4)'
-          }}>
-            <span style={{color: 'white', fontWeight: 'bold', fontSize: '1.5rem'}}>PG</span>
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="Company Logo" 
+            style={{ 
+              height: '70px', 
+              objectFit: 'contain', 
+              margin: '0 auto 1.5rem auto', 
+              display: 'block',
+              filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))'
+            }} 
+          />
           <h1>Pagawe HR</h1>
           <p>{mode === 'reset' ? 'Reset Kata Sandi Anda' : 'Sistem Manajemen SDM Internal'}</p>
         </div>
