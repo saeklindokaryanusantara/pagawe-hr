@@ -218,6 +218,7 @@ const Clients = () => {
           </tbody>
         </table>
       </div>
+      </div>
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={handleCloseModal}>
