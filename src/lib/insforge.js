@@ -63,54 +63,93 @@ const mockTables = {
 // Simple chainable mock query builder
 function createMockQueryBuilder(table) {
   let filters = {};
-  
-    let isSingle = false;
+  let isSingle = false;
+  let action = 'select'; // select, insert, update, delete
+  let payloadData = null;
     
-    const builder = {
-      select: () => builder,
-      insert: (payload) => {
-        console.warn(`[Mock DB] Insert into ${table}:`, payload);
-        return builder;
-      },
-      update: (payload) => {
-        console.warn(`[Mock DB] Update ${table}:`, payload);
-        return builder;
-      },
-      delete: () => {
-        console.warn(`[Mock DB] Delete from ${table}`);
-        return builder;
-      },
-      eq: (col, val) => {
-        filters[col] = val;
-        return builder;
-      },
-      order: () => builder,
-      limit: () => builder,
-      single: () => {
-        isSingle = true;
-        return builder;
-      },
-      maybeSingle: () => {
-        isSingle = true;
-        return builder;
-      },
-      then: (resolve, reject) => {
-        // This makes it thenable/awaitable
-        let data = mockTables[table] ? [...mockTables[table]] : [];
-        
-        // Apply eq filters
+  const builder = {
+    select: () => builder,
+    insert: (payload) => {
+      console.warn(`[Mock DB] Insert into ${table}:`, payload);
+      action = 'insert';
+      payloadData = payload;
+      return builder;
+    },
+    update: (payload) => {
+      console.warn(`[Mock DB] Update ${table}:`, payload);
+      action = 'update';
+      payloadData = payload;
+      return builder;
+    },
+    delete: () => {
+      console.warn(`[Mock DB] Delete from ${table}`);
+      action = 'delete';
+      return builder;
+    },
+    eq: (col, val) => {
+      filters[col] = val;
+      return builder;
+    },
+    order: () => builder,
+    limit: () => builder,
+    single: () => {
+      isSingle = true;
+      return builder;
+    },
+    maybeSingle: () => {
+      isSingle = true;
+      return builder;
+    },
+    then: (resolve, reject) => {
+      let data = mockTables[table] ? [...mockTables[table]] : [];
+      let resultData = null;
+
+      if (action === 'insert') {
+        const rows = Array.isArray(payloadData) ? payloadData : [payloadData];
+        const newRows = rows.map(r => ({
+          ...r,
+          id: r.id || Date.now() + Math.floor(Math.random() * 1000)
+        }));
+        if (!mockTables[table]) mockTables[table] = [];
+        mockTables[table].push(...newRows);
+        resultData = isSingle ? newRows[0] : newRows;
+      } 
+      else if (action === 'update' || action === 'delete') {
+        let affectedRows = [];
+        mockTables[table] = data.filter(row => {
+          let matches = true;
+          Object.entries(filters).forEach(([col, val]) => {
+            if (String(row[col]) !== String(val)) matches = false;
+          });
+          
+          if (matches) {
+            affectedRows.push(row);
+            return action !== 'delete'; // remove if delete
+          }
+          return true; // keep if not matching
+        });
+
+        if (action === 'update') {
+          affectedRows.forEach(row => {
+            Object.assign(row, payloadData);
+          });
+          resultData = isSingle ? affectedRows[0] : affectedRows;
+        } else {
+          resultData = isSingle ? affectedRows[0] : affectedRows;
+        }
+      } 
+      else {
+        // SELECT
         Object.entries(filters).forEach(([col, val]) => {
           data = data.filter(row => String(row[col]) === String(val));
         });
-        
-        if (isSingle) {
-          data = data.length > 0 ? data[0] : null;
-        }
-        
-        const result = { data, error: null, count: Array.isArray(data) ? data.length : 1 };
-        return Promise.resolve(result).then(resolve, reject);
+        resultData = isSingle ? (data.length > 0 ? data[0] : null) : data;
       }
-    };
+      
+      const result = { data: resultData, error: null, count: Array.isArray(resultData) ? resultData.length : 1 };
+      return Promise.resolve(result).then(resolve, reject);
+    }
+  };
   return builder;
 }
 

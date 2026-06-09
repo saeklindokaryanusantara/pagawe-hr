@@ -40,13 +40,31 @@ const Employees = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const { data, error } = await insforge
-        .database.from('employees')
-        .select('*')
-        .order('name');
+      const [empRes, contRes] = await Promise.all([
+        insforge.database.from('employees').select('*').order('name'),
+        insforge.database.from('contracts').select('*')
+      ]);
       
-      if (error) throw error;
-      if (data) setEmployees(data);
+      if (empRes.error) throw empRes.error;
+      
+      if (empRes.data) {
+        let employeeData = empRes.data;
+        if (contRes.data) {
+          const now = new Date();
+          employeeData = employeeData.map(emp => {
+            // Find latest contract
+            const empContracts = contRes.data.filter(c => c.employee_id === emp.id);
+            if (empContracts.length > 0) {
+              const latest = empContracts.sort((a, b) => new Date(b.start_date) - new Date(a.start_date))[0];
+              if (latest.end_date && new Date(latest.end_date) < now && latest.contract_status === 'Active') {
+                return { ...emp, status: 'Inactive', _reason: 'Contract Expired' };
+              }
+            }
+            return emp;
+          });
+        }
+        setEmployees(employeeData);
+      }
     } catch (error) {
       console.error('Error fetching employees:', error.message);
     } finally {
