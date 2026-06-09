@@ -153,27 +153,6 @@ function createMockQueryBuilder(table) {
   return builder;
 }
 
-// Compatibility layer: @insforge/sdk used `client.database.from()`,
-// but @supabase/supabase-js uses `client.from()` directly.
-// Adding a `database` property so all existing code works without changes.
-
-const originalFrom = _realClient.from.bind(_realClient);
-
-_realClient.from = (table) => {
-  try {
-    const mockUserStr = localStorage.getItem('mock_user');
-    if (mockUserStr) {
-      const mockUser = JSON.parse(mockUserStr);
-      if (mockUser.isMock) {
-        return createMockQueryBuilder(table);
-      }
-    }
-  } catch (e) {
-    // ignore
-  }
-  return originalFrom(table);
-};
-
 _realClient.database = _realClient;
 
 // Export a combined client: real auth + real database mapping
