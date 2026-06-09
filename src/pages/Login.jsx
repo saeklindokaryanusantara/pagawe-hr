@@ -69,7 +69,7 @@ const Login = () => {
             {mode === 'reset' ? 'Reset Kata Sandi Anda' : (
               <>
                 Sistem Manajemen SDM Internal<br />
-                <span style={{ fontWeight: '600', color: '#ffffff' }}>PT. Saeklindo Karya Nusantara</span>
+                <span style={{ fontWeight: '600', color: '#ffffff', fontSize: '0.95rem' }}>PT. Saeklindo Karya Nusantara</span>
               </>
             )}
           </p>
