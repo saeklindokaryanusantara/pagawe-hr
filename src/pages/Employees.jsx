@@ -21,6 +21,7 @@ const Employees = () => {
   const [editingId, setEditingId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState([]);
+  const [masterDepartments, setMasterDepartments] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -35,7 +36,17 @@ const Employees = () => {
   useEffect(() => {
     fetchEmployees();
     fetchProjects();
+    fetchDepartments();
   }, []);
+
+  const fetchDepartments = async () => {
+    try {
+      const { data, error } = await insforge.database.from('departments').select('name').order('name');
+      if (data) setMasterDepartments(data.map(d => d.name));
+    } catch (e) {
+      console.error('Error fetching departments:', e.message);
+    }
+  };
 
   const fetchEmployees = async () => {
     try {
@@ -453,7 +464,12 @@ const Employees = () => {
                 <div style={{display: 'flex', gap: '1rem'}}>
                   <div className="form-row" style={{flex: 1}}>
                     <label className="form-label">Department *</label>
-                    <input type="text" className="form-control" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} required />
+                    <select className="form-control" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} required>
+                      <option value="">-- Select Department --</option>
+                      {masterDepartments.map(dept => (
+                        <option key={dept} value={dept}>{dept}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="form-row" style={{flex: 1}}>
                     <label className="form-label">Assignment Type</label>
