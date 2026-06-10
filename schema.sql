@@ -89,6 +89,16 @@ CREATE TABLE contracts (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Employee Documents table
+CREATE TABLE employee_documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+    document_name TEXT NOT NULL,
+    document_type TEXT NOT NULL,
+    document_url TEXT NOT NULL,
+    uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Indexes on foreign key columns (prevent full table scans on JOINs and CASCADE)
 CREATE INDEX idx_projects_client_id ON projects(client_id);
 CREATE INDEX idx_project_assignments_employee_id ON project_assignments(employee_id);
