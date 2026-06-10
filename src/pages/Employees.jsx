@@ -51,29 +51,42 @@ const Employees = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const [empRes, contRes] = await Promise.all([
+      const [empRes, contRes, projAssignRes] = await Promise.all([
         insforge.database.from('employees').select('*').order('name'),
-        insforge.database.from('contracts').select('*')
+        insforge.database.from('contracts').select('*'),
+        insforge.database.from('project_assignments').select('*')
       ]);
       
       if (empRes.error) throw empRes.error;
       
       if (empRes.data) {
         let employeeData = empRes.data;
-        if (contRes.data) {
-          const now = new Date();
-          employeeData = employeeData.map(emp => {
-            // Find latest contract
+        employeeData = employeeData.map(emp => {
+          let updatedEmp = { ...emp };
+          if (contRes.data) {
+            const now = new Date();
             const empContracts = contRes.data.filter(c => c.employee_id === emp.id);
             if (empContracts.length > 0) {
               const latest = empContracts.sort((a, b) => new Date(b.start_date) - new Date(a.start_date))[0];
               if (latest.end_date && new Date(latest.end_date) < now && latest.contract_status === 'Active') {
-                return { ...emp, status: 'Inactive', _reason: 'Contract Expired' };
+                updatedEmp.status = 'Inactive';
+                updatedEmp._reason = 'Contract Expired';
               }
             }
-            return emp;
-          });
-        }
+          }
+          if (projAssignRes.data) {
+            const empAssignments = projAssignRes.data.filter(a => a.employee_id === emp.id);
+            if (empAssignments.length > 0) {
+              const latestAssignment = empAssignments.sort((a, b) => {
+                const dateA = a.assigned_at ? new Date(a.assigned_at) : new Date(0);
+                const dateB = b.assigned_at ? new Date(b.assigned_at) : new Date(0);
+                return dateB - dateA;
+              })[0];
+              updatedEmp.project_id = latestAssignment.project_id;
+            }
+          }
+          return updatedEmp;
+        });
         setEmployees(employeeData);
       }
     } catch (error) {
@@ -219,7 +232,7 @@ const Employees = () => {
         department: employee.department || '',
         status: employee.status || 'Active',
         assignment_type: employee.assignment_type || 'Regular',
-        project_id: ''
+        project_id: employee.project_id || ''
       });
     } else {
       setEditingId(null);
@@ -262,11 +275,16 @@ const Employees = () => {
         if (data) newEmployeeId = data.id;
       }
       
-      // If project-based and project selected, create assignment
+      // Manage project assignment
+      if (editingId) {
+        // Clear existing assignment if we're editing
+        await insforge.database.from('project_assignments').delete().eq('employee_id', newEmployeeId);
+      }
+      
       if (employeeData.assignment_type === 'Project-based' && selectedProject && newEmployeeId) {
         await insforge.database.from('project_assignments').insert([{
           employee_id: newEmployeeId,
-          project_id: parseInt(selectedProject)
+          project_id: selectedProject
         }]);
       }
       
