@@ -132,20 +132,19 @@ const Contracts = () => {
       
       // Upload file if selected
       if (selectedFile) {
-        try {
-          const fileExt = selectedFile.name.split('.').pop();
-          const fileName = `contracts/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-          const { data: uploadData, error: uploadError } = await insforge.storage
-            .from('documents')
-            .upload(fileName, selectedFile);
-          
-          if (uploadError) throw uploadError;
-          const { data } = insforge.storage.from('documents').getPublicUrl(fileName);
-          documentUrl = data.publicUrl;
-        } catch (uploadErr) {
-          console.warn('File upload failed (mock mode):', uploadErr);
-          documentUrl = `mock://documents/${selectedFile.name}`;
-        }
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `contracts/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const uploadPromise = insforge.storage.from('documents').upload(fileName, selectedFile, { upsert: true });
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Upload timeout. Jaringan tidak stabil atau file terlalu besar.')), 45000)
+        );
+
+        const { data: uploadData, error: uploadError } = await Promise.race([uploadPromise, timeoutPromise]);
+        
+        if (uploadError) throw uploadError;
+        const { data } = insforge.storage.from('documents').getPublicUrl(fileName);
+        documentUrl = data.publicUrl;
       }
 
       const payload = {
@@ -170,8 +169,8 @@ const Contracts = () => {
       handleCloseModal();
       fetchContracts();
     } catch (error) {
-      console.error('Error saving contract:', error.message);
-      alert('Gagal menyimpan kontrak: ' + error.message);
+      console.error('Error saving contract:', error.message || error);
+      alert('Gagal menyimpan kontrak: ' + (error.message || 'Error tidak diketahui'));
     } finally {
       setIsSubmitting(false);
     }

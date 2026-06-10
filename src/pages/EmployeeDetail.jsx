@@ -106,20 +106,21 @@ const EmployeeDetail = () => {
       setIsUploading(true);
       
       let documentUrl = null;
-      try {
-        const fileExt = selectedFile.name.split('.').pop();
-        const fileName = `employees/${id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const { data: uploadData, error: uploadError } = await insforge.storage
-          .from('documents')
-          .upload(fileName, selectedFile);
-        
-        if (uploadError) throw uploadError;
-        const { data } = insforge.storage.from('documents').getPublicUrl(fileName);
-        documentUrl = data.publicUrl;
-      } catch (uploadErr) {
-        console.warn('File upload failed (mock mode):', uploadErr);
-        documentUrl = `mock://documents/${selectedFile.name}`;
-      }
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `employees/${id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      // Add timeout to prevent hanging on large files or proxy issues
+      const uploadPromise = insforge.storage.from('documents').upload(fileName, selectedFile, { upsert: true });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Upload timeout. Jaringan tidak stabil atau file terlalu besar.')), 45000)
+      );
+
+      const { data: uploadData, error: uploadError } = await Promise.race([uploadPromise, timeoutPromise]);
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = insforge.storage.from('documents').getPublicUrl(fileName);
+      documentUrl = data.publicUrl;
 
       const payload = {
         employee_id: id,
@@ -128,18 +129,21 @@ const EmployeeDetail = () => {
         document_url: documentUrl
       };
 
-      const { error } = await insforge.database.from('employee_documents').insert([payload]);
+      const insertPromise = insforge.database.from('employee_documents').insert([payload]);
+      const insertTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout')), 10000));
+      const { error } = await Promise.race([insertPromise, insertTimeout]);
+      
       if (error) throw error;
       
       // Refresh documents
-      const { data } = await insforge.database.from('employee_documents').select('*').eq('employee_id', id);
-      if (data) setDocuments(data);
+      const { data: docsData } = await insforge.database.from('employee_documents').select('*').eq('employee_id', id);
+      if (docsData) setDocuments(docsData);
       
       setIsUploadModalOpen(false);
       setSelectedFile(null);
     } catch (error) {
-      console.error('Error uploading document:', error.message);
-      alert('Gagal mengunggah dokumen.');
+      console.error('Error uploading document:', error.message || error);
+      alert('Gagal mengunggah dokumen: ' + (error.message || 'Error tidak diketahui'));
     } finally {
       setIsUploading(false);
     }
