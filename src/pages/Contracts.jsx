@@ -140,7 +140,8 @@ const Contracts = () => {
             .upload(fileName, selectedFile);
           
           if (uploadError) throw uploadError;
-          documentUrl = insforge.storage.from('documents').getPublicUrl(fileName);
+          const { data } = insforge.storage.from('documents').getPublicUrl(fileName);
+          documentUrl = data.publicUrl;
         } catch (uploadErr) {
           console.warn('File upload failed (mock mode):', uploadErr);
           documentUrl = `mock://documents/${selectedFile.name}`;
